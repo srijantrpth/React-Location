@@ -9,6 +9,8 @@ const App = () => {
   const [position, setPosition] = useState(null);
   const [locationMode, setLocationMode] = useState('hardcoded');
   const trackeePosition = locationMode === 'hardcoded' ? { latitude: 30.766851, longitude: 76.576063 } : position;
+  const [realTimePosition, setRealTimePosition] = useState({ latitude: null, longitude: null });
+
 
   const theme = createTheme({
     palette: {
@@ -21,6 +23,35 @@ const App = () => {
     longitude: 76.576063, // Hardcoded longitude
     radius: 1000, // Hardcoded radius in meters
   };
+  useEffect(() => {
+    if (isTrackee && locationMode === 'automatic') {
+      navigator.geolocation.watchPosition(
+        (pos) => {
+          const coords = pos.coords;
+          setPosition(coords);
+          setRealTimePosition({ latitude: coords.latitude, longitude: coords.longitude });
+        },
+        (error) => console.error(error),
+        { enableHighAccuracy: true, distanceFilter: 10 }
+      );
+    } else if (locationMode === 'hardcoded') {
+      setRealTimePosition({ latitude: 30.766851, longitude: 76.576063 });
+    }
+  }, [isTrackee, locationMode]);
+<Grid container spacing={3} justifyContent="center" alignItems="center" style={{ minHeight: '80vh' }}>
+  <Grid item xs={12}>
+    <Paper elevation={3} style={{ padding: '20px', textAlign: 'center' }}>
+      <Typography variant="h5">Real-Time Coordinates</Typography>
+      <Typography variant="body1" style={{ marginTop: '10px' }}>
+        Latitude: {realTimePosition.latitude !== null ? realTimePosition.latitude : 'Loading...'}
+      </Typography>
+      <Typography variant="body1" style={{ marginTop: '10px' }}>
+        Longitude: {realTimePosition.longitude !== null ? realTimePosition.longitude : 'Loading...'}
+      </Typography>
+    </Paper>
+  </Grid>
+</Grid>
+  
 
   useEffect(() => {
     if (isTrackee && locationMode === 'automatic') {
